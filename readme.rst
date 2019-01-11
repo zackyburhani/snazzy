@@ -1,5 +1,5 @@
 ###################
-Kezia Laundry Service
+SNAZZY
 ###################
 
-Sistem Informasi Laundry Menggunakan Codeigniter, MySQL, jQuery dan AJAX
+Sistem Informasi Penjualan SNAZZY Menggunakan Codeigniter, MySQL, jQuery dan AJAX
