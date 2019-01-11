@@ -31,13 +31,34 @@ class ControllerRetur extends CI_Controller
         $data = [
             'title' => 'Tambah Retur Barang',
             'retur' => $this->Model->getAll('retur'),
-            'barang' => $this->Model->getAll('barang'),
+            'barang' => $this->Model->getBarang_pesan(),
         ];
         $this->destroy();
         $this->load->view('template/v_header',$data);
         $this->load->view('template/v_sidebar');
         $this->load->view('v_tambah_retur');
         $this->load->view('template/v_footer');
+    }
+
+    function get_barang()
+    {
+        $barang = $this->Model->getAll('barang');
+    
+        if(empty($barang)){
+            echo json_encode(null);
+        } else {
+            foreach ($barang as $nota) {
+                $print[] = [
+                    'id_brg' => $nota->id_brg,
+                    'nm_brg' => $nota->nm_brg,
+                    'artikel' => $nota->artikel,
+                    'stok' => $nota->stok,
+                    'size' => $nota->size,
+                    'harga' => number_format($nota->harga,0,',','.'),
+                ];
+            }
+         echo json_encode($print);
+        }
     }
 
     function get_nota()
@@ -55,6 +76,7 @@ class ControllerRetur extends CI_Controller
                 foreach ($data as $nota) {
                 $print[] = [
                     'id_pesan' => $nota->id_pesan,
+                    'id_copy' => $nota->id_copy,
                     'tgl_bayar' => shortdate_indo($nota->tgl_bayar),
                     'diskon' => $nota->diskon,
                     'id_plg' => $nota->id_plg,
@@ -100,12 +122,13 @@ class ControllerRetur extends CI_Controller
 
 		$id_brg = $this->input->post('id_brg');
 
-		$barang = $this->Model->getByID('barang','id_brg',$id_brg);
+		$barang = $this->Model->getCopyBarangID($id_brg);
 
 		$data = [
-	        'id' => $barang->id_brg, 
+	        'id' => $barang->id_copy, 
 	        'name' => $barang->nm_brg, 
 	        'price' => $barang->harga, 
+            'size' => $barang->size,
 	        'qty' => $this->input->post('qty'), 
 	    ];
 
@@ -122,10 +145,10 @@ class ControllerRetur extends CI_Controller
             $output .='
                 <tr>
                 	<td align="center">'.$no.".".'</td>
-                    <td align="center">'.$items['id'].'</td>
                     <td>'.$items['name'].'</td>
-                    <td align="center">'.number_format($items['price'],0,',','.').'</td>
-                    <td align="center">'.$items['qty'].'</td> 
+                    <td align="center">'.$items['size'].'</td>
+                    <td align="center">'.$items['qty'].'</td>
+                    <td align="center">'.number_format($items['price'],0,',','.').'</td> 
                     <td align="right">'.number_format($items['subtotal'],0,',','.').'</td>
                     <td align="center"><button type="button" id="'.$items['rowid'].'" class="hapus_cart btn btn-danger btn-md"><i class="glyphicon glyphicon-trash"></i></button></td>
                 </tr>
@@ -199,12 +222,20 @@ class ControllerRetur extends CI_Controller
 		$jml_bayar = $this->input->post('jml_bayar');
 
 		$data = [
-			'id_brg' => $id_brg,
+			'id_copy' => $id_brg,
 			'id_retur' => $id_retur,
 			'qty' => $qty,
 			'jml_harga' => $jml_bayar,
 		];
 
+        $stok_sekarang = $this->Model->getByID('copy_barang','id_copy',$id_brg);
+        $stok = $stok_sekarang->stok-$qty;
+
+        $data_update = [
+            'stok' => $stok,
+        ];
+
+        $update = $this->Model->update('id_copy',$id_brg,$data_update,'copy_barang');
 		$result = $this->Model->simpan('detail_retur',$data);
 
 		echo json_encode($result);
@@ -242,14 +273,6 @@ class ControllerRetur extends CI_Controller
 		echo json_encode($detail);
 	}
 
-	function get_jasa()
-	{
-		$kd_jasa = $this->input->get('kd_jasa');
-		$kd_order = $this->input->get('kd_order');
-		$data = $this->Model->getJoinJasa_ID($kd_jasa,$kd_order);
-		echo json_encode($data);
-	}
-
 	function get_detail_retur()
 	{
 		$no_nota = $this->input->get('no_nota');
@@ -260,6 +283,7 @@ class ControllerRetur extends CI_Controller
                 'nm_brg' => $key->nm_brg,
                 'harga' => number_format($key->harga,0,',','.'),
                 'qty' => $key->qty,
+                'sizes' => $key->size,
                 'jml_harga' => number_format($key->jml_harga,0,',','.'),
             ];
         }
@@ -394,7 +418,7 @@ class ControllerRetur extends CI_Controller
     function cekStok()
     {
         $id_brg = $this->input->post('id_brg');
-        $stok = $this->Model->getByID('barang','id_brg',$id_brg);
+        $stok = $this->Model->getByID('copy_barang','id_copy',$id_brg);
         echo $stok->stok;
     }
 

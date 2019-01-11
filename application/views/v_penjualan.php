@@ -1,23 +1,23 @@
 <div class="content-wrapper">
-    <section class="content-header">
-      <h1>
-        Laporan Penjualan
-        <small></small>
-      </h1>
-    </section>
+  <section class="content-header">
+    <h1>
+      Laporan Penjualan
+      <small></small>
+    </h1>
+  </section>
 
-        <?php if ($this->session->flashdata('pesanGagal') == TRUE) { ?>
-           <script>
-            setTimeout(function() {
-              swal({
-                  title: "<?php echo $this->session->flashdata('pesanGagal') ?>",
-                  text: "",
-                  icon: "error",
-                  button: "Ok !",
-                });
-                  }, 600);
-          </script>
-        <?php } ?>
+  <?php if ($this->session->flashdata('pesanGagal') == TRUE) { ?>
+    <script>
+      setTimeout(function() {
+        swal({
+          title: "<?php echo $this->session->flashdata('pesanGagal') ?>",
+          text: "",
+          icon: "error",
+          button: "Ok !",
+        });
+      }, 600);
+    </script>
+  <?php } ?>
 
     <section class="content">
       <div class="row">

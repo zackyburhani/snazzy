@@ -10,9 +10,7 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="panel panel-default">
-          <div class="panel-heading">
-            <a href="<?php echo site_url('pesan') ?>" class="btn btn-success"><i class="fa fa-arrow-left"></i> Kembali</a>
-          </div>
+          <br>
           <div class="panel-body">
             <div class="col-md-12">
               <form class="form-horizontal">
@@ -24,7 +22,21 @@
                   <div class="col-md-4">
                     <select class="form-control select2" name="id_brg">
                       <?php foreach($barang as $brg){ ?>
-                        <option value="<?php echo $brg->id_brg ?>"><?php echo $brg->nm_brg ?></option>
+
+                        <?php 
+                          $stok = $brg->stok;
+                          $size = $brg->size;
+                          $harga = $brg->harga;
+
+                          if($stok == "" || $harga == "" || $size == ""){
+                            $stok = '-';
+                            $size = '-';
+                            $harga = '-';
+                          }
+
+                         ?> 
+
+                        <option value="<?php echo $brg->id_copy ?>"><?php echo $brg->nm_brg." / ".$size." / ".$stok." / ".number_format((int)$harga,0,',','.')." / " ?></option>
                       <?php } ?>
                     </select>
                   </div>
@@ -53,9 +65,9 @@
             <thead>
               <tr>
                 <th align="center" width="50px">No. </th>
-                <th align="center"><center>ID Barang</center></th>
                 <th align="center"><center>Nama Barang</center></th>
                 <th align="center"><center>Harga</center></th>
+                <th align="center"><center>Size</center></th>
                 <th align="center"><center>QTY</center></th>
                 <th align="center"><center>Jumlah Harga</center></th>
                 <th align="center"><center>Hapus</center></th>
@@ -86,20 +98,31 @@
           
           <div class="row">
             <div class="col-md-6">
-              <div class="form-group"><label>ID Pesan</label>
-                <input required class="form-control required text-capitalize" data-placement="top" data-trigger="manual" type="text" name="id_pesan" readonly>
+              <div class="form-group"><label>Nomor Nota</label>
+                <input required class="form-control required text-capitalize" data-placement="top" data-trigger="manual" type="text" name="nomor_nota" readonly>
+                <input required class="form-control required text-capitalize" data-placement="top" data-trigger="manual" type="hidden" name="id_pesan" readonly>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group"><label>Diskon</label>
-                <div style="margin-left: 20px">
-                  <input type="checkbox" name="diskon"> Pilih Diskon
-                </div>
+                <input required class="form-control required text-capitalize" data-placement="top" data-trigger="manual" type="hidden" name="diskon">
               </div>
             </div>
           </div>
 
           <hr>
+            <div class="form-group"><label>Cari Data Pelanggan</label>
+              <div class="input-group">
+                <input type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" class="form-control" placeholder="Cari Nomor Telepon" name="cari_pelanggan">
+                  <span class="input-group-btn">
+                    <button type="button" onclick="cari()" class="btn btn-info btn-flat"><i class="fa fa-search"></i> Cari</button>
+                  </span>
+              </div>
+
+            </div>
+          <hr>
+
+          <input type="hidden" name="id_plg">
 
           <div class="form-group"><label>Nama Pelanggan</label>
             <input required class="form-control required text-capitalize" placeholder="Input Nama Pelanggan" data-placement="top" data-trigger="manual" type="text" name="nm_plg">
@@ -177,6 +200,8 @@
             var id_brg = $('[name="id_brg"]').val();
             var qty = $('[name="qty"]').val();
 
+            console.log(id_brg)
+
             if (qty == "") {
                 swal({
                   title: "QTY Tidak Boleh Kosong",
@@ -228,7 +253,7 @@
             
                         if(quantity > stok){
                           swal({
-                            title: "Stok Tidak Cukups",
+                            title: "Stok Tidak Cukup",
                             text: "",
                             icon: "error",
                             button: "Ok !",
@@ -298,9 +323,23 @@
                     $.each(data,function(id_pesan){
                       $('#ModalTambahPesan').modal('show');
                       $('[name="id_pesan"]').val(data.id_pesan);
+                      $('[name="nomor_nota"]').val(data.no_nota);
                     });
                   }
                 });
+
+                $.ajax({
+                  type : "GET",
+                  url  : "<?php echo base_url('ControllerPesan/getKodePelanggan')?>",
+                  dataType : "JSON",
+                  success: function(data_plg){
+                    console.log(data_plg);
+                    $('#ModalTambahPesan').modal('show');
+                    $('[name="id_plg"]').val(data_plg);
+                  }
+                });
+
+
               }
             }
           });
@@ -309,7 +348,7 @@
         });
 
         //Simpan pesan
-        $('#btn_simpan').on('click',function(){
+        $('#btn_simpan').on('click',function(){ 
           var id_pesan = $('[name="id_pesan"]').val();
           
           if($('[name="diskon"]').is(':checked')){
@@ -318,58 +357,110 @@
             var diskon = "";
           }
 
-          var nm_plg = $('[name="nm_plg"]').val();
           var no_telp = $('[name="no_telp"]').val();
-          var alamat = $('[name="alamat"]').val();
-
+          //cek nomor yang sama
           $.ajax({
-            type : "POST",
-            url  : "<?php echo base_url('pesan/simpan')?>",
+            type : "get",
+            url  : "<?php echo base_url('pesan/get_pelanggan')?>",
             dataType : "JSON",
-            data : {id_pesan:id_pesan, diskon:diskon, nm_plg:nm_plg, no_telp:no_telp ,alamat:alamat},
+            data : {no_telp:no_telp},
             success: function(data){
-              $('[name="id_pesan"]').val();
-              $('[name="diskon"]').val();
-              $('[name="nm_plg"]').val();
-              $('[name="no_telp"]').val();
-              $('[name="alamat"]').val();
-              $('#ModalTambahPesan').modal('hide');
 
-              $.ajax({
-                type : "GET",
-                url  : "<?php echo base_url('ControllerPesan/load_detail')?>",
-                dataType : "JSON",
-                success: function(data){
-
-                  $.each(data,function(index,objek){
-                    var id = objek.id;
-                    var qty = objek.qty;
-                    var price = objek.price;
+              var nm_plg = $('[name="nm_plg"]').val();
+              var no_telp = $('[name="no_telp"]').val();
+              var alamat = $('[name="alamat"]').val();
+              if(data != null){
+                var id_plg = data.id_plg;
+              } else {
+                var id_plg = $('[name="id_plg"]').val();
+              }
               
-                    $.ajax({
-                      type : "POST",
-                      url  : "<?php echo base_url('pesan/simpan_detail')?>",
-                      dataType : "JSON",
-                      data : {id_brg:id, id_pesan:id_pesan, qty:qty, jml_bayar:price},
+              $.ajax({
+                type : "POST",
+                url  : "<?php echo base_url('pesan/simpan')?>",
+                dataType : "JSON",
+                data : {id_pesan:id_pesan, id_plg:id_plg, diskon:diskon, nm_plg:nm_plg, no_telp:no_telp ,alamat:alamat},
+                success: function(data){
+                  $('[name="id_pesan"]').val();
+                  $('[name="diskon"]').val();
+                  $('[name="nm_plg"]').val();
+                  $('[name="no_telp"]').val();
+                  $('[name="alamat"]').val();
+                  $('#ModalTambahPesan').modal('hide');
 
-                    }); 
+                  $.ajax({
+                    type : "GET",
+                    url  : "<?php echo base_url('ControllerPesan/load_detail')?>",
+                    dataType : "JSON",
+                    success: function(data){
 
+                      $.each(data,function(index,objek){
+                        var id = objek.id;
+                        var qty = objek.qty;
+                        var price = objek.price;
+                      
+                        $.ajax({
+                          type : "POST",
+                          url  : "<?php echo base_url('pesan/simpan_detail')?>",
+                          dataType : "JSON",
+                          data : {id_brg:id, id_pesan:id_pesan, qty:qty, jml_bayar:price},
+
+                        }); 
+                      });
+                    }
+                  });  
+                  $('[name="cari_pelanggan"]').val("");
+                  $('[name="diskon"]').val("");
+                  $('[name="nm_plg"]').val("");
+                  $('[name="no_telp"]').val("");
+                  $('[name="alamat"]').val("");
+                  swal({
+                      title: "Berhasil Disimpan",
+                      text: "",
+                      icon: "success",
+                      button: "Ok !",
+                    }).then(function() {
+                      $('#detail_cart').load('<?php echo base_url('pesan/destroy') ?>');
+                      window.location.href="<?php echo base_url('order')?>";
                   });
                 }
-              });  
-
-              swal({
-                  title: "Berhasil Disimpan",
-                  text: "",
-                  icon: "success",
-                  button: "Ok !",
-                }).then(function() {
-                  $('#detail_cart').load('<?php echo base_url('pesan/destroy') ?>');
-                  window.location.href = "<?php echo site_url('pesan') ?>";
               });
+            
             }
-          });
+          });          
           return false;
         });
     });
+
+
+function cari()
+{
+  var no_telp = $('[name="cari_pelanggan"]').val();
+  $.ajax({
+    type : "GET",
+    url  : "<?php echo base_url('pesan/get_pelanggan')?>",
+    dataType : "JSON",  
+    data : {no_telp:no_telp},
+    success: function(data){
+      if(data == null){
+        swal({
+          title: "Data Tidak Ditemukan",
+          text: "",
+          icon: "error",
+          button: "Ok !",
+          });
+        $('[name="nm_plg"]').val("");
+        $('[name="no_telp"]').val("");
+        $('[name="alamat"]').val("");
+        return false;
+      }
+
+      $('[name="nm_plg"]').val(data.nm_plg);
+      $('[name="no_telp"]').val(data.no_telp);
+      $('[name="alamat"]').val(data.alamat);
+    }
+  });
+
+}
+
 </script> 

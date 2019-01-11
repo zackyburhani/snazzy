@@ -75,7 +75,7 @@ class ControllerLapPesan extends CI_Controller
         $pdf->Cell(10,1,'',0,1);
         $pdf->SetFont('Arial','B',8);
         $pdf->Cell(10,6,'No.',1,0,'C');
-        $pdf->Cell(25,6,'ID Pesan',1,0,'C');
+        $pdf->Cell(25,6,'Nomor Nota',1,0,'C');
         $pdf->Cell(55,6,'Nama Pelanggan',1,0,'C');
         $pdf->Cell(25,6,'ID Barang',1,0,'C');
         $pdf->Cell(45,6,'Barang',1,0,'C');
@@ -87,7 +87,7 @@ class ControllerLapPesan extends CI_Controller
         foreach ($pesan as $row)
         {
             $pdf->Cell(10,6,$no++.".",1,0,'C');
-            $pdf->Cell(25,6,$row->id_pesan,1,0,'C');
+            $pdf->Cell(25,6,$row->no_nota,1,0,'C');
             if($row->nm_plg == null){
                 $pdf->Cell(55,6,'-',1,0,'C');
             } else {

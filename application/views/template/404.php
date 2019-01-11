@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>404 Not Found</title>
+  <title>SNAZZY | 404 Not Found</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.7 -->
@@ -18,6 +18,9 @@
        folder instead of downloading all of them to reduce the load. -->
   <link rel="stylesheet" href="<?php echo site_url('assets/AdminLTE/dist/css/skins/_all-skins.min.css')?>">
 
+  <!-- logo -->
+  <link rel="SHORTCUT ICON" href="<?php echo base_url('assets/img/logo.png')?>">
+
 </head>
 <!-- ADD THE CLASS layout-top-nav TO REMOVE THE SIDEBAR. -->
 <body class="hold-transition skin-purple layout-top-nav">
@@ -30,7 +33,7 @@
     <nav class="navbar navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <a href="http://www.rsiadhia.co.id/" target="_blank" class="navbar-brand"><b>SNAZZY</b></a>
+          <a href="<?php echo site_url('dashboard') ?>" class="navbar-brand"><b>SNAZZY</b></a>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
             <i class="fa fa-bars"></i>
           </button>

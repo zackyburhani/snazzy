@@ -71,6 +71,7 @@ $route['pelanggan/getKode'] = 'ControllerPelanggan/getKode';
 
 //barang
 $route['barang'] = 'ControllerBarang';
+$route['barang/copy_barang'] = 'ControllerBarang/copy_barang';
 $route['barang/data_barang'] = 'ControllerBarang/data_barang';
 $route['barang/simpan'] = 'ControllerBarang/simpan';
 $route['barang/ubah'] = 'ControllerBarang/ubah';
@@ -90,6 +91,7 @@ $route['pesan/get_detail_pesan'] = 'ControllerPesan/get_detail_pesan';
 $route['pesan/proses/(:any)'] = 'ControllerPesan/proses/$1';
 $route['pesan/getKode'] = 'ControllerPesan/getKode';
 $route['pesan/destroy'] = 'ControllerPesan/destroy';
+$route['pesan/get_pelanggan'] = 'ControllerPesan/get_pelanggan';
 
 //retur
 $route['retur'] = 'ControllerRetur';
@@ -103,6 +105,7 @@ $route['retur/get_detail_retur'] = 'ControllerRetur/get_detail_retur';
 $route['retur/get_nota'] = 'ControllerRetur/get_nota';
 $route['retur/getKode'] = 'ControllerRetur/getKode';
 $route['retur/destroy'] = 'ControllerRetur/destroy';
+$route['retur/get_barang'] = 'ControllerRetur/get_barang';
 
 //laporan penjualan
 $route['laporan_penjualan'] = 'ControllerPenjualan';

@@ -75,20 +75,26 @@ class ControllerLapRetur extends CI_Controller
         $pdf->Cell(10,1,'',0,1);
         $pdf->SetFont('Arial','B',8);
         $pdf->Cell(10,6,'No.',1,0,'C');
+        $pdf->Cell(25,6,'Nomor Nota',1,0,'C');
+        $pdf->Cell(25,6,'Tanggal Retur',1,0,'C');
         $pdf->Cell(40,6,'Nama Pelanggan',1,0,'C');
-        $pdf->Cell(55,6,'Nama Barang',1,0,'C');
-        $pdf->Cell(40,6,'QTY',1,0,'C');
-        $pdf->Cell(45,6,'Jumlah',1,1,'C');
+        $pdf->Cell(45,6,'Nama Barang',1,0,'C');
+        $pdf->Cell(10,6,'Size',1,0,'C');
+        $pdf->Cell(10,6,'QTY',1,0,'C');
+        $pdf->Cell(25,6,'Jumlah',1,1,'C');
         $pdf->SetFont('Arial','',8);
 
         $no = 1;
         foreach ($retur as $row)
         {
             $pdf->Cell(10,6,$no++.".",1,0,'C');
+            $pdf->Cell(25,6,$row->no_nota,1,0,'C');
+            $pdf->Cell(25,6,shortdate_indo($row->tgl_retur),1,0,'C');
             $pdf->Cell(40,6,ucwords($row->nm_plg),1,0,'C');
-            $pdf->Cell(55,6,ucwords($row->nm_brg),1,0,'C');
-            $pdf->Cell(40,6,$row->qty,1,0,'C');
-            $pdf->Cell(45,6,number_format($row->jml_harga,0,',','.'),1,1,'C');
+            $pdf->Cell(45,6,ucwords($row->nm_brg),1,0,'C');
+            $pdf->Cell(10,6,$row->size,1,0,'C');
+            $pdf->Cell(10,6,$row->qty,1,0,'C');
+            $pdf->Cell(25,6,number_format($row->jml_harga,0,',','.'),1,1,'C');
         }
         
         $pdf->Cell(10,10,'',0,1);

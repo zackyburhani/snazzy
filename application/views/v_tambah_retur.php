@@ -6,6 +6,8 @@
     </h1>
   </section>
 
+  <tes></tes>
+
   <section class="content">
     <div class="row">
         <div class="col-lg-12">
@@ -78,17 +80,31 @@
                   <div class="col-md-1">
                     <label class="control-label">Barang</label>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-5" >
                     <select class="form-control select2" name="id_brg">
                       <?php foreach($barang as $brg){ ?>
-                        <option value="<?php echo $brg->id_brg ?>"><?php echo $brg->nm_brg ?></option>
+
+                        <?php 
+                          $stok = $brg->stok;
+                          $size = $brg->size;
+                          $harga = $brg->harga;
+
+                          if($stok == "" || $harga == "" || $size == ""){
+                            $stok = '-';
+                            $size = '-';
+                            $harga = '-';
+                          }
+
+                         ?> 
+
+                        <option value="<?php echo $brg->id_copy ?>"><?php echo $brg->nm_brg." / ".$size." / ".$stok." / ".number_format((int)$harga,0,',','.')." / " ?></option>
                       <?php } ?>
                     </select>
                   </div>
                   <div class="col-md-1">
                     <label class="control-label">Jumlah</label>
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-2">
                     <input type="number" name="qty" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" min="1" placeholder="QTY" required class="form-control">
                   </div>
                   <div class="col-md-3">
@@ -110,10 +126,10 @@
             <thead>
               <tr>
                 <th align="center" width="50px">No. </th>
-                <th align="center"><center>ID Barang</center></th>
                 <th align="center"><center>Nama Barang</center></th>
-                <th align="center"><center>Harga</center></th>
+                <th align="center"><center>Size</center></th>
                 <th align="center"><center>QTY</center></th>
+                <th align="center"><center>Harga</center></th>
                 <th align="center"><center>Jumlah Harga</center></th>
                 <th align="center"><center>Hapus</center></th>
               </tr>
@@ -351,6 +367,40 @@
         });
     });
 
+// function dropdown(data)
+// {
+//   // console.log(data);
+
+//   //ambil data dengan harga yang sama
+//   $.ajax({
+//     type : "GET",
+//     url  : "<?php echo base_url('retur/get_barang')?>",
+//     dataType : "JSON",
+//     success: function(barang){
+
+//       var i = 0;
+//       for(i=0; i<barang.length; i++){
+//         // console.log(barang[i].harga);
+//         // console.log(data[i]);
+
+//         if(data[i] == undefined){
+//           continue;
+//         }
+
+//         if(barang[i].harga == data[i].harga){
+//           var tmp = [{idBrg : barang[i].id_brg,nmBrg : barang[i].nm_brg}];
+//         }
+//       }
+
+//       for(var val in data) {
+//           $('#taro').append($('<option />', {value: data[val].id_brg, text: data[val].nm_brg}));
+          
+//       }
+      
+//     }
+//   });
+// }
+
 function cari()
 {
   var no_nota = $('[name="cari_nomor_nota"]').val();
@@ -361,6 +411,8 @@ function cari()
     dataType : "JSON",
     data : {no_nota:no_nota},
     success: function(data){
+
+      // dropdown(data);
 
       if(data == null){
         swal({

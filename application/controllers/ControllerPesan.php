@@ -28,13 +28,21 @@ class ControllerPesan extends CI_Controller
     {   
         $data = [
             'title' => 'Tambah Pesan Barang',
-            'barang' => $this->Model->getAll('barang')
+            'barang' => $this->Model->getBarang_pesan()
         ];
         $this->destroy();
         $this->load->view('template/v_header',$data);
         $this->load->view('template/v_sidebar');
         $this->load->view('v_tambah_pesan');
         $this->load->view('template/v_footer');
+    }
+
+    function get_pelanggan()
+    {   
+        $no_telp = $this->input->get('no_telp');
+        $pelanggan = $this->Model->getByID('pelanggan','no_telp',$no_telp);
+
+        echo json_encode($pelanggan);
     }
 
     function cekCart()
@@ -50,8 +58,10 @@ class ControllerPesan extends CI_Controller
 	function getKode()
 	{
 		$kode = $this->Model->getKodePesan();
+        $no_nota = $this->Model->getNomorNota();
 		$data = [
-			'id_pesan' => $kode
+			'id_pesan' => $kode,
+            'no_nota' => $no_nota
 		];
 		echo json_encode($data); die();
 	}
@@ -60,12 +70,13 @@ class ControllerPesan extends CI_Controller
 
 		$id_brg = $this->input->post('id_brg');
 
-		$barang = $this->Model->getByID('barang','id_brg',$id_brg);
+		$barang = $this->Model->getCopyBarangID($id_brg);
 
 		$data = [
-	        'id' => $barang->id_brg, 
+	        'id' => $barang->id_copy, 
 	        'name' => $barang->nm_brg, 
-	        'price' => $barang->harga, 
+	        'price' => $barang->harga,
+            'size' => $barang->size,
 	        'qty' => $this->input->post('qty'), 
 	    ];
 
@@ -82,9 +93,9 @@ class ControllerPesan extends CI_Controller
             $output .='
                 <tr>
                 	<td align="center">'.$no.".".'</td>
-                    <td align="center">'.$items['id'].'</td>
                     <td>'.$items['name'].'</td>
                     <td align="center">'.number_format($items['price'],0,',','.').'</td>
+                    <td align="center">'.$items['size'].'</td> 
                     <td align="center">'.$items['qty'].'</td> 
                     <td align="right">'.number_format($items['subtotal'],0,',','.').'</td>
                     <td align="center"><button type="button" id="'.$items['rowid'].'" class="hapus_cart btn btn-danger btn-md"><i class="glyphicon glyphicon-trash"></i></button></td>
@@ -126,12 +137,18 @@ class ControllerPesan extends CI_Controller
         echo $this->show_cart();
     }
 
+    function getKodePelanggan()
+    {
+        $id_plg = $this->Model->getKodePlg();
+        echo json_encode($id_plg);
+    }
+
     function simpan()
 	{  
         $id_pesan = $this->input->post('id_pesan');
 		$tgl_bayar = date('Y-m-d');
 		$diskon = $this->input->post('diskon');
-		$id_plg = $this->Model->getKodePlg();
+		$id_plg = $this->input->post('id_plg');
         $nm_plg = $this->input->post('nm_plg');
         $no_telp = $this->input->post('no_telp');
         $alamat = $this->input->post('alamat');
@@ -142,7 +159,9 @@ class ControllerPesan extends CI_Controller
             $diskon = 20000;
         }
 
-        if($nm_plg != null){
+        $id_pelanggan = $this->Model->getByID('pelanggan','id_plg',$id_plg);
+
+        if($id_pelanggan == null){
             $data_pelanggan = [
                 'id_plg' => $id_plg,
                 'nm_plg' => ucwords($nm_plg),
@@ -150,14 +169,6 @@ class ControllerPesan extends CI_Controller
                 'alamat' => $alamat
             ];
             $result_plg = $this->Model->simpan('pelanggan',$data_pelanggan);
-        }
-
-        $id_pelanggan = $this->Model->getByID('pelanggan','id_plg',$id_plg);
-
-        if($id_pelanggan == null){
-            $id_plg = null;
-        } else {
-            $id_plg = $id_pelanggan->id_plg;
         }
 
 		$data_pesan = [
@@ -203,20 +214,20 @@ class ControllerPesan extends CI_Controller
 		$jml_bayar = $this->input->post('jml_bayar');
 
 		$data = [
-			'id_brg' => $id_brg,
+			'id_copy' => $id_brg,
 			'id_pesan' => $id_pesan,
 			'qty' => $qty,
 			'jml_bayar' => $jml_bayar,
 		];
 
-        $stok_sekarang = $this->Model->getByID('barang','id_brg',$id_brg);
+        $stok_sekarang = $this->Model->getByID('copy_barang','id_copy',$id_brg);
         $stok = $stok_sekarang->stok-$qty;
 
         $data_update = [
             'stok' => $stok,
         ];
 
-        $update = $this->Model->update('id_brg',$id_brg,$data_update,'barang');
+        $update = $this->Model->update('id_copy',$id_brg,$data_update,'copy_barang');
 		$result = $this->Model->simpan('detail_pesan',$data);
 
 		echo json_encode($result);
@@ -299,13 +310,6 @@ class ControllerPesan extends CI_Controller
             }
             echo json_encode($cetak);
         }
-	}
-
-	function get_detail_order_ver2()
-	{
-		$kd_order = $this->input->get('kd_order');
-		$data = $this->Model->getJoinDetail_ID_ver2($kd_order);	
-		echo json_encode($data);
 	}
 
 	function proses($kd_order)
@@ -466,7 +470,7 @@ class ControllerPesan extends CI_Controller
     function cekStok()
     {
         $id_brg = $this->input->post('id_brg');
-        $stok = $this->Model->getByID('barang','id_brg',$id_brg);
+        $stok = $this->Model->getByID('copy_barang','id_copy',$id_brg);
         echo $stok->stok;
     }
 
@@ -478,29 +482,5 @@ class ControllerPesan extends CI_Controller
 
         echo json_encode($data);   
     }
-
-	function validasi_ambil()
-	{
-		$kd_order = $this->input->post('kd_order');
-		$status1 = $this->Model->getJoinDetail_ID_validasi($kd_order);
-		$status0 = $this->Model->getJoinDetail_ID($kd_order);
-		
-		if(count($status0) == count($status1)){
-			echo json_encode("sama");
-		} else {
-			echo json_encode("tidak");
-		}
-	}
-
-	function ambil()
-	{
-		$kd_order = $this->input->post('kd_order');
-		$data = [
-			'status' => '1'
-		];
-		$result2 = $this->Model->update('kd_order',$kd_order,$data,'order_pesanan');
-
-		echo json_encode($result2);
-	}
 
 }

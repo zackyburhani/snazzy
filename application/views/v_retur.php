@@ -54,6 +54,7 @@
               <th align="center" width="50px">No. </th>
               <th align="center"><center>ID Barang</center></th>
               <th align="center"><center>Nama Barang</center></th>
+              <th align="center"><center>Size</center></th>
               <th align="center"><center>Harga</center></th>
               <th align="center"><center>QTY</center></th>
               <th align="center"><center>Jumlah Harga</center></th>
@@ -188,6 +189,7 @@ $(document).ready(function(){
                                   '<td><center>'+no++ +'.'+'</center></td>'+
                                   '<td><center>'+data[i].id_brg+'</center></td>'+
                                   '<td><center>'+data[i].nm_brg+'</center></td>'+
+                                  '<td><center>'+data[i].sizes+'</center></td>'+
                                   '<td><center>'+data[i].harga+'</center></td>'+
                                   '<td><center>'+data[i].qty+'</center></td>'+
                                   '<td><center>'+data[i].jml_harga+'</center></td>'+

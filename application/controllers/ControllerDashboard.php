@@ -20,6 +20,7 @@ class ControllerDashboard extends CI_Controller {
 			'pelanggan' => $this->Model->jumlah('pelanggan'),
 			'pesan' => $this->Model->jumlah('pesan'),
 			'retur' => $this->Model->jumlah('retur'),
+			'copy' => $this->Model->jumlah('copy_barang'),
 			'title' => 'Dashboard'
 		];
 		$this->load->view('template/v_header',$data);

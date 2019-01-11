@@ -75,7 +75,7 @@ class ControllerPenjualan extends CI_Controller
         $pdf->Cell(10,1,'',0,1);
         $pdf->SetFont('Arial','B',8);
         $pdf->Cell(10,6,'No.',1,0,'C');
-        $pdf->Cell(30,6,'ID Pesan',1,0,'C');
+        $pdf->Cell(30,6,'Nomor Nota',1,0,'C');
         $pdf->Cell(50,6,'Nama Barang',1,0,'C');
         $pdf->Cell(15,6,'Size',1,0,'C');
         $pdf->Cell(20,6,'Diskon',1,0,'C');
@@ -88,7 +88,7 @@ class ControllerPenjualan extends CI_Controller
         foreach ($pendapatan as $row)
         {
             $pdf->Cell(10,6,$no++.".",1,0,'C');
-            $pdf->Cell(30,6,$row->id_pesan,1,0,'C');
+            $pdf->Cell(30,6,$row->no_nota,1,0,'C');
             $pdf->Cell(50,6,$row->nm_brg,1,0);
             $pdf->Cell(15,6,$row->size,1,0,'C');
             if($row->diskon == 0){

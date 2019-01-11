@@ -33,8 +33,26 @@
             <a href="<?php echo site_url('barang') ?>" class="small-box-footer">Lihat Selengkapnya <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
-        <!-- ./col -->
+        
         <div class="col-md-4">
+          <!-- small box -->
+          <div class="small-box bg-aqua">
+            <div class="inner">
+              <h3><?php echo $copy ?></h3>
+              <p>Data Copy Barang</p>
+            </div>
+            <div class="icon">
+              <i class="fa fa-cubes"></i>
+            </div>
+            <a href="<?php echo site_url('barang/copy_barang') ?>" class="small-box-footer">Lihat Selengkapnya <i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <!-- ./col -->
+      </div>
+
+      <div class="row"> 
+        <!-- ./col -->
+        <div class="col-md-6">
           <!-- small box -->
           <div class="small-box bg-green">
             <div class="inner">
@@ -48,12 +66,7 @@
           </div>
         </div>
 
-        <!-- ./col -->
-      </div>
-
-      <div class="row"> 
-        <!-- ./col -->
-        <div class="col-md-12">
+        <div class="col-md-6">
           <!-- small box -->
           <div class="small-box bg-primary">
             <div class="inner">

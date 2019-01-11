@@ -108,6 +108,91 @@ class Model extends CI_Model {
 		return $check;
 	}
 
+	public function getBarang_Copy($id)
+	{
+		$check = false;
+		try{
+			$this->db->select('*');
+			$this->db->from('barang');
+			$this->db->join('copy_barang', 'copy_barang.id_brg = barang.id_brg');
+			$this->db->where('barang.id_brg',$id);
+			$this->db->order_by('copy_barang.id_copy','DESC');
+			$query = $this->db->get();
+			return $query->result();
+		}catch (Exception $ex) {
+			$check = false;
+		}
+		return $check;
+	}
+
+	public function getCopyBarangID($id)
+	{
+		$check = false;
+		try{
+			$this->db->select('*');
+			$this->db->from('barang');
+			$this->db->join('copy_barang', 'copy_barang.id_brg = barang.id_brg');
+			$this->db->where('copy_barang.id_copy',$id);
+			$query = $this->db->get();
+			return $query->row();
+		}catch (Exception $ex) {
+			$check = false;
+		}
+		return $check;
+	}
+
+
+	public function getBarang_pesan()
+	{
+		$check = false;
+		try{
+			$query = $this->db->query("
+				SELECT barang.id_brg as id_barang,nm_brg, artikel, harga, id_copy, size, stok,
+					(SELECT SUM(stok) FROM copy_barang WHERE copy_barang.id_brg = id_barang GROUP by copy_barang.id_brg) as total
+				FROM barang
+					JOIN copy_barang ON copy_barang.id_brg = barang.id_brg
+				ORDER BY barang.id_brg DESC");
+			return $query->result();
+		}catch (Exception $ex) {
+			$check = false;
+		}
+		return $check;
+	}
+
+	public function getBarang()
+	{
+		$check = false;
+		try{
+			$query = $this->db->query("
+				SELECT barang.id_brg as id_barang,nm_brg, artikel, harga, id_copy, size, stok,
+					(SELECT SUM(stok) FROM copy_barang WHERE copy_barang.id_brg = id_barang GROUP by copy_barang.id_brg) as total
+				FROM barang
+					LEFT JOIN copy_barang ON copy_barang.id_brg = barang.id_brg
+				GROUP BY barang.id_brg
+				ORDER BY barang.id_brg DESC");
+			return $query->result();
+		}catch (Exception $ex) {
+			$check = false;
+		}
+		return $check;
+	}
+
+	public function barangCopy()
+	{
+		$check = false;
+		try{
+			$this->db->select('*');
+			$this->db->from('barang');
+			$this->db->join('copy_barang', 'copy_barang.id_brg = barang.id_brg');
+			$this->db->order_by('copy_barang.id_copy','DESC');
+			$query = $this->db->get();
+			return $query->result();
+		}catch (Exception $ex) {
+			$check = false;
+		}
+		return $check;
+	}
+
 	//by id
 	public function getJoinPesan_ID($no_nota)
 	{
@@ -156,7 +241,8 @@ class Model extends CI_Model {
 			$this->db->join('nota', 'nota.id_pesan = pesan.id_pesan');
 			$this->db->join('retur', 'retur.no_nota = nota.no_nota');
 			$this->db->join('detail_retur', 'detail_retur.id_retur = retur.id_retur');
-			$this->db->join('barang', 'detail_retur.id_brg = barang.id_brg');
+			$this->db->join('copy_barang', 'detail_retur.id_copy = copy_barang.id_copy');
+			$this->db->join('barang', 'barang.id_brg = copy_barang.id_brg');
 			$this->db->where('nota.no_nota',$no_nota);
 			$this->db->order_by('nota.no_nota','DESC');
 			$query = $this->db->get();
@@ -175,7 +261,8 @@ class Model extends CI_Model {
 				SELECT * FROM pesan 
 					JOIN nota ON nota.id_pesan = pesan.id_pesan 
 					JOIN detail_pesan ON detail_pesan.id_pesan = pesan.id_pesan
-					JOIN barang ON barang.id_brg = detail_pesan.id_brg
+					JOIN copy_barang ON copy_barang.id_copy = detail_pesan.id_copy
+					JOIN barang ON barang.id_brg = copy_barang.id_brg
 				WHERE nota.no_nota = '$no_nota'
 			");
 			return $query->result();
@@ -210,7 +297,8 @@ class Model extends CI_Model {
 			$this->db->from('pesan');
 			$this->db->join('detail_pesan', 'pesan.id_pesan = detail_pesan.id_pesan');
 			$this->db->join('nota', 'nota.id_pesan = pesan.id_pesan');
-			$this->db->join('barang', 'barang.id_brg = detail_pesan.id_brg');
+			$this->db->join('copy_barang', 'copy_barang.id_copy = detail_pesan.id_copy');
+			$this->db->join('barang', 'barang.id_brg = copy_barang.id_brg');
 			$this->db->where('nota.no_nota',$no_nota);
 			$query = $this->db->get();
 			return $query->result();
@@ -225,16 +313,16 @@ class Model extends CI_Model {
 		$check = false;
 		try{
 			$query = $this->db->query("
-				SELECT id_brg as id_barang, 
-					(SELECT nm_brg FROM barang WHERE barang.id_brg = id_barang) as nm_brg,
-				    (SELECT size FROM barang WHERE barang.id_brg = id_barang) as size,
-				    (SELECT harga FROM barang WHERE barang.id_brg = id_barang) as harga,
+				SELECT barang.id_brg as id_barang, nm_brg, size,
 				    qty,
+                    harga,
 				    detail_retur.jml_harga as jml_harga
 				FROM pesan
 					JOIN nota ON nota.id_pesan = pesan.id_pesan
 					JOIN retur ON retur.no_nota = nota.no_nota
 					JOIN detail_retur ON detail_retur.id_retur = retur.id_retur
+                    JOIN copy_barang ON copy_barang.id_copy = detail_retur.id_copy
+                    JOIN barang ON barang.id_brg = copy_barang.id_brg
 				WHERE nota.no_nota = '$no_nota'
 			");
 			return $query->result();
@@ -271,7 +359,8 @@ class Model extends CI_Model {
 				SELECT * FROM pesan 
 					JOIN nota ON nota.id_pesan = pesan.id_pesan 
 					JOIN detail_pesan ON detail_pesan.id_pesan = pesan.id_pesan
-					JOIN barang ON barang.id_brg = detail_pesan.id_brg
+					JOIN copy_barang ON copy_barang.id_copy = detail_pesan.id_copy
+					JOIN barang ON barang.id_brg = copy_barang.id_brg
 					JOIN retur ON retur.no_nota = nota.no_nota
 				WHERE nota.no_nota = '$no_nota'
 			");
@@ -298,7 +387,8 @@ class Model extends CI_Model {
 					LEFT JOIN pelanggan ON pelanggan.id_plg = pesan.id_plg
 					LEFT JOIN nota ON nota.id_pesan = pesan.id_pesan
 					LEFT JOIN detail_pesan ON pesan.id_pesan = detail_pesan.id_pesan
-					LEFT JOIN barang ON detail_pesan.id_brg = barang.id_brg
+					LEFT JOIN copy_barang ON detail_pesan.id_copy = copy_barang.id_copy
+					LEFT JOIN barang ON barang.id_brg = copy_barang.id_brg
 				WHERE nota.no_nota = '$no_nota'");
 			return $query->result();
 		}catch (Exception $ex) {
@@ -369,6 +459,22 @@ class Model extends CI_Model {
        	return "BRG".$kd;
     }
 
+    //kode barang copy
+	public function getKodeBarangCopy()
+    {
+       	$q  = $this->db->query("SELECT MAX(RIGHT(id_copy,7)) as kd_max from copy_barang");
+       	$kd = "";
+    	if($q->num_rows() > 0) {
+        	foreach ($q->result() as $k) {
+          		$tmp = ((int)$k->kd_max)+1;
+           		$kd = sprintf("%07s",$tmp);
+        	}
+    	} else {
+         $kd = "0000001";
+    	}
+       	return "CPY".$kd;
+    }
+
     //kode Order
 	public function getKodePesan()
     {
@@ -392,8 +498,10 @@ class Model extends CI_Model {
 		try{
 			$query = $this->db->query("
 				SELECT * FROM pesan 
+					JOIN nota ON nota.id_pesan = pesan.id_pesan
 					JOIN detail_pesan ON pesan.id_pesan = detail_pesan.id_pesan
-    				JOIN barang ON barang.id_brg = detail_pesan.id_brg
+    				JOIN copy_barang ON copy_barang.id_copy = detail_pesan.id_copy
+    				JOIN barang ON barang.id_brg = copy_barang.id_brg
     			WHERE pesan.tgl_bayar BETWEEN '$awal' AND '$akhir'
 			");
 			return $query->result();
@@ -410,7 +518,8 @@ class Model extends CI_Model {
 			$query = $this->db->query("
 				SELECT diskon, (SUM(jml_bayar)-diskon) as total FROM pesan 
 					JOIN detail_pesan ON pesan.id_pesan = detail_pesan.id_pesan
-    				JOIN barang ON barang.id_brg = detail_pesan.id_brg
+    				JOIN copy_barang ON copy_barang.id_copy = detail_pesan.id_copy
+    				JOIN barang ON barang.id_brg = copy_barang.id_brg
     			WHERE pesan.tgl_bayar BETWEEN '$awal' AND '$akhir' GROUP by pesan.id_pesan
 			");
 			return $query->result();
@@ -430,7 +539,8 @@ class Model extends CI_Model {
 					JOIN nota ON nota.id_pesan = pesan.id_pesan
 					JOIN retur ON retur.no_nota = nota.no_nota
 					JOIN detail_retur ON retur.id_retur = detail_retur.id_retur
-					JOIN barang ON barang.id_brg = detail_retur.id_brg
+					JOIN copy_barang ON copy_barang.id_copy = detail_retur.id_copy
+					JOIN barang ON barang.id_brg = copy_barang.id_brg
 				 WHERE retur.tgl_retur BETWEEN '$awal' AND '$akhir'
 			");
 			return $query->result();
@@ -447,8 +557,10 @@ class Model extends CI_Model {
 			$query = $this->db->query("
 				SELECT * FROM pesan
 					LEFT JOIN pelanggan ON pelanggan.id_plg = pesan.id_plg
+					LEFT JOIN nota ON nota.id_pesan = pesan.id_pesan
 					LEFT JOIN detail_pesan ON detail_pesan.id_pesan = pesan.id_pesan
-					LEFT JOIN barang ON detail_pesan.id_brg = barang.id_brg
+					JOIN copy_barang ON copy_barang.id_copy = detail_pesan.id_copy
+    				JOIN barang ON barang.id_brg = copy_barang.id_brg
 				WHERE pesan.tgl_bayar BETWEEN '$awal' AND '$akhir'
 			");
 			return $query->result();
